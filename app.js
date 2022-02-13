@@ -4,7 +4,9 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const md5 = require("md5");
+const bcrypt = require("bcrypt");
+const { x } = require("tar");
+const saltRound = 10;
 
 const app = express();
 app.use(express.static("public"));
@@ -30,7 +32,7 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
   let username = req.body.username;
-  let password = md5(req.body.password);
+  let password = req.body.password
   User.findOne({ email: username }, (err, foundUser) => {
     if (err) {
       console.log(err);
@@ -53,10 +55,13 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const newUser = new User({
     email: req.body.username,
-    password: md5(req.body.password),
-  });
+    password: bcrypt.hash(req.body.password, saltRound, (err,hash)=>{
+        
+    }),
+  });x. 
+                                                                1111111111111111111111111111111111111111111111
 
-  newUser.save((err) => {
+newUser.save((err) => {
     if (!err) {
       res.render("secrets");
     } else {
