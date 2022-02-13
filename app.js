@@ -4,23 +4,40 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const bcrypt = require("bcrypt");
-const { x } = require("tar");
-const saltRound = 10;
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
 
 const app = express();
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true });
+// mongoose.set("useCreateIndex", true);
 
-const userSchema = {
+app.use(
+  session({
+    secret: "Enrico Riski",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
+
+userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.get("/", (req, res) => {
   res.render("home");
@@ -30,44 +47,12 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.post("/login", (req, res) => {
-  let username = req.body.username;
-  let password = req.body.password
-  User.findOne({ email: username }, (err, foundUser) => {
-    if (err) {
-      console.log(err);
-    } else {
-      if (foundUser) {
-        if (foundUser.password === password) {
-          res.render("secrets");
-        } else {
-          console.log("Password invalid.");
-        }
-      }
-    }
-  });
-});
+app.post("/login", (req, res) => {});
+
+app.post("/register", (req, res) => {});
 
 app.get("/register", (req, res) => {
   res.render("register");
-});
-
-app.post("/register", (req, res) => {
-  const newUser = new User({
-    email: req.body.username,
-    password: bcrypt.hash(req.body.password, saltRound, (err,hash)=>{
-        
-    }),
-  });x. 
-                                                                1111111111111111111111111111111111111111111111
-
-newUser.save((err) => {
-    if (!err) {
-      res.render("secrets");
-    } else {
-      console.log(err);
-    }
-  });
 });
 
 app.listen(3000, () => {
